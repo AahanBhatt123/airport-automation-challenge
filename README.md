@@ -37,7 +37,7 @@ Modern airports rely on connected systems to move passengers, aircraft, baggage,
 
 In this challenge, your team has been invited to prototype a software or software-adjacent solution for an airport automation problem. You may extend the supplied code, combine ideas from several sub-problems, or create a related solution of your own. Your solution should be realistic enough to connect to airport operations, but focused enough to prototype during the challenge.
 
-Toronto Pearson International Airport (YYZ) is the setting for this challenge. Think like an airport systems engineer:
+Toronto Pearson International Airport (YYZ) is the setting for this challenge. Pearson handles about 128,000 passengers daily, routing their luggage through ~2000 conveyors. This complicated web of passengers, luggage, flights, gates, need good software to manage. To build good software, think like an airport systems engineer:
 
 - expect incomplete, late, or conflicting data
 - consider safety, privacy, accessibility, and operational constraints
