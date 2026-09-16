@@ -1,118 +1,94 @@
 # Departure Control System Automation
 
-## Challenge overview
+A Departure Control System (DCS) handles everything that has to happen before a passenger and an aircraft are ready to leave: check-in, identity and document checks, baggage acceptance, seat assignment, boarding passes, boarding status, and aircraft load control.
 
-A Departure Control System (DCS) runs the departure side of an airline operation: check-in, identity and document verification, baggage acceptance, boarding pass issuance, boarding control, and weight and balance.
+None of that works well as separate checkpoints. A bad document holds up boarding, a late bag shifts the load numbers, a passenger running behind changes whether the flight can close on time. Airport staff need one place that tells them what's done, what's stuck, and what they have to step in on.
 
-It answers questions like:
+Pick somewhere in that pipeline and build something useful. It could be one process, it could be a few connected together.
 
-- Is this passenger correctly identified, with valid documents for the destination?
-- How many bags should we expect from this passenger or group?
-- Is the aircraft load balanced across cabin and cargo?
-- Has a bag moved from check-in through screening, sorting, and loading?
-- Can check-in, baggage, identity, and boarding all be seen from one place?
+## Table of Contents
 
-This challenge is a scaled-down version of that problem. Pick a piece of it and build a real solution - see [Challenge summary](#challenge-summary).
+- [Challenge](#challenge)
+- [Potential Solutions](#potential-solutions)
+- [Resources](#resources)
 
-## Industry context
+## Challenge
 
-Airline departure operations run on systems that must stay in sync - passenger records, schedules, seat maps, aircraft configuration, baggage data, document checks, boarding status, load constraints - all changing right up to departure.
+Improve some part of passenger or aircraft departure processing. A few of the questions a good solution might answer:
 
-A DCS sits at the center: it takes in passenger and booking data, runs check-in, accepts bags, validates documents, issues boarding passes, tracks boarding, and feeds load control, continuously.
+- Is this passenger identified and cleared for travel?
+- Which passengers or bags need staff review?
+- Is the aircraft load within structural and balance limits?
+- Has each bag reached the expected checkpoint?
+- Is the flight ready to close and board?
+- Can an operator understand the current state from one screen?
 
-A key part of DCS is passenger processing: moving passengers from check-in to the aircraft while ensuring each step is completed correctly. This includes identity and document verification, baggage acceptance, boarding pass issuance, security and boarding status updates, and handling exceptions such as invalid travel documents or passengers requiring manual review. Rather than operating as isolated checkpoints, these processes feed into the Departure Control System, giving airline and airport staff a single, continuously updated view of passenger readiness and flight status.
+Things worth getting right along the way:
 
-The industry is shifting from rule-based, manually supervised processing toward predictive, AI-assisted processing: estimating bag counts, spotting group patterns, flagging no-show risk, recommending load adjustments before problems show up at the gate.
+- a clear model for passengers, bags, flights, or aircraft zones
+- state changes and decisions that can be traced back
+- handling for missing, late, or conflicting data
+- a real explanation when something's blocked or flagged, not just a status code
+- privacy, accessibility, and a way for staff to override the system
+- a scope you can actually finish and demo
 
-**Real systems that solve this problem:** Brock Solutions SmartSuite Enterprise, SITA Horizon DCS, Amadeus Altéa Departure Control. Yours will be much smaller, but the underlying ideas are the same.
+### Inputs and Expected Outputs
 
-## The pipeline
+You'll likely be working with passenger lists, bookings, seat maps, aircraft layouts, baggage records, scan events, document fields, and schedules. As it is difficult to find perfect datasets, some of it will be missing, late, or contradictory. Design for that instead of around it.
 
-1. Load passenger, booking, flight, and aircraft data
-2. Passenger checks in and verifies identity
-3. Documents are validated; issues flagged for review
-4. Bags are accepted, tagged, linked to the passenger
-5. Bag scans update live baggage state
-6. Load is estimated across aircraft zones
-7. System recommends seat, bag, or review actions
-8. Operational view shows departure readiness
+Whatever you build should make departure readiness legible at a glance: current status, what was decided, what still needs attention, and why.
 
-Focus on clear data flow and decisions, not handling every edge case.
+## Potential Solutions
 
-## How this maps to real systems
+A few possible scopes below. You can extend one or build something else entirely.
 
-| Hackathon concept | Industry analogue |
-|---|---|
-| Check-in flow | DCS check-in processing |
-| ID/document upload | Passport/visa/identity verification |
-| Boarding pass generation | Departure control passenger acceptance |
-| Bag tag creation | Baggage acceptance and reconciliation |
-| Scan events | Baggage handling system tracking |
-| Bag status dashboard | Baggage operations monitoring |
-| Predicted bag count | Passenger behavior / load forecasting |
-| Seat/load recommendation | Aircraft load control |
-| Manual review flags | Agent intervention, exception handling |
-| Unified ops dashboard | Departure readiness control |
+| Potential solution | Description | Starting point |
+| --- | --- | --- |
+| Unified identity gateway | Combine booking lookup, document checks, seat selection, baggage declaration, boarding passes, and agent review. | [Working implementation](unified-identity-gateway/README.md) |
+| Aircraft load control | Assign passenger and cargo load to aircraft zones while respecting weight and balance limits. | [`load-control/`](load-control/) |
+| Passenger-processing monitor | Track passengers through checkpoints and highlight congestion or incomplete steps. | [Passenger-processing ideas](passenger-processing/README.md) |
+| Document-review assistant | Validate required fields, identify mismatches, and route uncertain cases to an agent. | [Identity-gateway rules](unified-identity-gateway/apps/api/src/rules/) |
+| Boarding-readiness dashboard | Combine document, seat, baggage, and boarding state into one operator view. | [Unified Identity Gateway](unified-identity-gateway/README.md) |
+| Baggage reconciliation tool | Link accepted bags to passengers and explain missing or unexpected scans. | [Baggage Handling System](../baggage-handling-system/README.md) |
 
-## Challenge summary
+## Resources
 
-The problem space is anything inside a DCS - check-in, identity/document verification, baggage tracking, load balancing, boarding control, or the dashboard tying it together. There's no fixed feature list: pick a piece and build a real solution to it. Narrow and complete beats broad and shallow.
+### Industry Context
 
-This repo includes two implemented examples, covering different slices of the DCS pipeline. They're here to show expected scope and depth, not to define the required shape of your submission:
+Departure operations run on a pile of data that keeps shifting until takeoff: passenger records, schedules, seat maps, aircraft configuration, baggage data, document checks, boarding status, load constraints. A DCS sits in the middle of it by taking all relevant data points and consolidate it so that a staff can easily analyze the data and find out where things can go wrong.
 
-- **[Unified Identity Gateway](unified-identity-gateway/)** - identity verification, document checks, and boarding pass issuance as a single check-in flow that clearly shows whether a passenger is cleared, blocked, or needs manual review.
-- **[Load Control](load-control/)** - the "load is estimated across aircraft zones" step of the pipeline: a MILP-based weight-and-balance optimizer (`load.py`) that assigns cargo and passenger load to aircraft bays/zones to hit a target center-of-gravity within structural and zero-fuel-weight limits, plus a small Flask app (`weight_balancer_app/`) exposing it as a live tool.
+Identity verification, baggage acceptance, security status, boarding, and manual review all end up affecting whether a passenger or flight is ready. Brock Solutions SmartSuite Enterprise, SITA Horizon DCS, and Amadeus Altéa Departure Control are real examples of systems doing this today, and the field is generally shifting from rigid rule-based workflows to adaptable automated systems.
 
-## Basic vs. advanced
+### Evaluation
 
-**Basic:** a deterministic workflow on mock data - clean modeling, obvious rule-based checks, a readable UI.
+Worth checking your solution against:
 
-**Advanced:** a predictive decision-support system - estimate what's likely to happen and recommend action before all the data is in.
+| Area | What to look for |
+| --- | --- |
+| Workflow completeness | Does the process work from input to result? |
+| Data modelling | Are passengers, bags, flights, seats, or load zones represented clearly? |
+| Decision quality | Are recommendations, predictions, and review flags useful? |
+| Exception handling | Does the system handle missing, inconsistent data, and edge cases? |
+| Dashboard clarity | Can an operator understand readiness and outstanding work from a glance? |
+| Privacy and accessibility | Is sensitive data minimized, and is feedback usable by people with different needs? |
+| Code quality | Is the implementation modular, readable, and maintainable? |
+| Demonstration | Does the demo make the value and limitations clear? |
 
-## State to track
+### Challenge Resources
 
-Model whatever your problem needs, clearly enough that state changes are traceable. Typical entities: **passenger** (ID, booking, flight, seat, document status, boarding status), **baggage** (tag ID, passenger, location/status, weight, exceptions), **flight** (aircraft type, seat map, zones, load, readiness).
+- [Unified Identity Gateway implementation](unified-identity-gateway/README.md)
+- [Passenger-processing project ideas](passenger-processing/README.md)
+- [Load-control implementation](load-control/)
+- [Identity-gateway challenge specification](unified-identity-gateway/docs/challenge-spec.md)
 
-## Inputs
+### Safety, Privacy, and Industry References
 
-Mock data - passenger lists, bookings, seat maps, aircraft layouts, baggage records, scan events, document fields, schedules. Expect it messy: missing fields, late updates, conflicting counts, inconsistent scans.
-
-## Expected outputs
-
-Whatever your solution produces should make departure readiness legible: status, decisions made, exceptions flagged, and why.
-
-## Evaluation
-
-- **Workflow completeness** - realistic, end-to-end flow?
-- **Data modeling** - clearly represented state?
-- **Decision quality** - are recommendations/flags actually useful?
-- **Exception handling** - does it catch messy or inconsistent data?
-- **Dashboard clarity** - can an operator tell readiness at a glance?
-- **Code quality** - modular, readable, maintainable?
-- **Demo quality** - does it make the case for why this matters?
-
-## Suggested milestones
-
-1. **Mock data and core models** - the entities your solution needs. *Demo: show them for one flight.*
-2. **Core flow working end-to-end** - the main thing your solution does, deterministically. *Demo: walk through one passenger/bag/decision.*
-3. **Exception handling** - flag the messy cases. *Demo: show a blocked/flagged case and why.*
-4. **Predictive/decision logic** - if applicable, add a smarter layer on top of the deterministic baseline. *Demo: explain a recommendation.*
-5. **Dashboard** - a single view of state and readiness. *Demo: an operator can see at a glance.*
-6. **Polish** - better test data, edge cases, a clean demo script.
-
-## Optional stretch goals
-
-Push any part of your solution from basic to advanced: richer data, smarter predictions, sharper UI, an audit log for overrides.
-
-## Final goal
-
-By the end, your system should make it clear: what's the state of the problem you picked, what needs attention, and why.
-
-That's the same question real DCS platforms answer for airlines every day before the aircraft pushes back.
-
-## Safety & Policy Resources
-
-- [IATA Resolution 753](https://www.iata.org/contentassets/5c4aa8b8b3b1432697d2bf3301450684/reso753-implementation-guide---2023_issue-4.02.pdf) - requires airlines to scan a bag at each handoff
-- [ICAO Doc 9303](https://www.icao.int/publications/pages/publication.aspx?docnum=9303) - the standard for machine-readable passports and ID docs
-- [ICAO Annex 9](https://www.icao.int/facilitation-programmes/Annex9) - border and document control rules
-- [ICAO Annex 6, Part I / IATA Weight and Balance Manual](https://www.icao.int/sites/default/files/sp-files/SAM/Documents/2008/RPEO03/Anexo%206%20ParteII%20Just%20Cambios.pdf) - weight and balance rules (see `load-control/`)
+- [IATA Resolution 753 baggage-tracking implementation guide](https://www.iata.org/contentassets/5c4aa8b8b3b1432697d2bf3301450684/reso753-implementation-guide---2023_issue-4.02.pdf): baggage tracking at defined handoff points
+- [ICAO Doc 9303 machine-readable travel documents](https://www.icao.int/publications/pages/publication.aspx?docnum=9303): international specifications for machine-readable passports and identity documents
+- [ICAO Annex 9: Facilitation](https://www.icao.int/facilitation-programmes/Annex9): international passenger, border, and document-control context
+- [ICAO Annex 6: Operation of Aircraft](https://store.icao.int/en/annex-6-operation-of-aircraft): international aircraft-operation context, including mass and balance responsibilities
+- [IATA Weight and Balance Manuals](https://www.iata.org/en/publications/manuals/weight-balance-manuals/): airline load-control procedures and data standards
+- [Canadian Aviation Security Regulations, 2012](https://laws-lois.justice.gc.ca/eng/regulations/SOR-2011-318/index.html)
+- [Secure Air Travel Regulations](https://laws-lois.justice.gc.ca/eng/regulations/SOR-2015-181/FullText.html)
+- [Personal Information Protection and Electronic Documents Act](https://laws-lois.justice.gc.ca/eng/acts/P-8.6/index.html)
+- [Accessible Transportation for Persons with Disabilities Regulations](https://laws-lois.justice.gc.ca/eng/regulations/SOR-2019-244/index.html)
