@@ -4,8 +4,15 @@ This folder contains a complete working example for the [Air Traffic Control cha
 
 You may extend the example, replace one part of it, or use only the pieces that help your team. You do not need to understand every file before making a useful change.
 
+## Architecture
+
+![Tracking architecture: scenario messages, message parser, anomaly gate, aircraft tracker, dead reckoning, outputs and visualiser](assets/atc_tracking_architecture.png)
+
+Every message takes the same path: validation and timestamp-ordered replay, then the anomaly checks, then the tracker. Dead reckoning supplies the great-circle maths the tracker predicts with. The advanced tier is optional.
+
 ## Table of Contents
 
+- [Architecture](#architecture)
 - [Challenge](#challenge)
 - [Resources](#resources)
 
