@@ -8,7 +8,7 @@ You may extend the example, replace one part of it, or use only the pieces that 
 
 ![Tracking architecture: scenario messages, message parser, anomaly gate, aircraft tracker, dead reckoning, outputs and visualiser](assets/atc_tracking_architecture.png)
 
-Every message takes the same path: validation and timestamp-ordered replay, then the anomaly checks, then the tracker. Dead reckoning supplies the great-circle maths the tracker predicts with. The advanced tier is optional.
+Every message takes the same path: validation and timestamp-ordered replay, then the anomaly checks, then the tracker. Dead reckoning supplies the great-circle maths the tracker predicts with. The advanced tier is optional for hackathon participants seeking an extra challenge.
 
 ## Table of Contents
 
